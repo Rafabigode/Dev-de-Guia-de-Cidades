@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Awards Overlay – Cyber Noir GODMODE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ================= PRESETS ================= */
+:root {
+  --blue:#2fb9ff;
+  --purple:#9b5cff;
+  --red:#ff3333;
+
+  --glow-blue:rgba(47,185,255,.6);
+  --glow-purple:rgba(155,92,255,.6);
+  --glow-red:rgba(255,50,50,.85);
+}
+
+/* ================= BASE ================= */
+html,body{
+  margin:0;
+  height:100%;
+  background:transparent;
+  font-family:'Orbitron',sans-serif;
+  overflow:hidden;
+}
+
+/* ================= GRID ================= */
+.grid{
+  position:fixed;
+  inset:0;
+  background:
+    repeating-linear-gradient(90deg,rgba(47,185,255,.04) 0 1px,transparent 40px),
+    repeating-linear-gradient(0deg,rgba(155,92,255,.04) 0 1px,transparent 40px);
+  animation:gridMove 22s linear infinite;
+  z-index:-3;
+}
+@keyframes gridMove{
+  to{background-position:400px 400px;}
+}
+
+/* ================= PARTICLES ================= */
+.particles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
+}
+.particle{
+  position:absolute;
+  width:3px;
+  height:3px;
+  background:var(--blue);
+  opacity:.35;
+  animation:float 14s linear infinite;
+}
+@keyframes float{
+  from{transform:translateY(110vh);}
+  to{transform:translateY(-10vh);}
+}
+.red-particle{background:var(--red);}
+
+/* ================= CONTAINER ================= */
+.awards{
+  position:fixed;
+  top:48px;
+  left:48px;
+  width:480px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  pointer-events:none;
+}
+
+/* ================= CARD ================= */
+.award{
+  position:relative;
+  padding:22px 28px;
+  background:
+    linear-gradient(135deg,
+      rgba(10,14,30,.97),
+      rgba(16,22,48,.9),
+      rgba(16,22,48,.5),
+      transparent);
+  border-left:6px solid var(--blue);
+
+  box-shadow:
+    0 0 30px var(--glow-blue),
+    inset 0 0 0 1px rgba(255,255,255,.05);
+
+  clip-path:polygon(0 0,96% 0,100% 18%,100% 100%,0 100%);
+  overflow:hidden;
+
+  animation:glitchIn .4s steps(2,end);
+
+  filter:
+    drop-shadow(1px 0 red)
+    drop-shadow(-1px 0 cyan);
+}
+
+/* ================= SIDE BAR ================= */
+.award::after{
+  content:'';
+  position:absolute;
+  inset:0 auto 0 0;
+  width:6px;
+  background:linear-gradient(180deg,var(--blue),var(--purple));
+  animation:barPulse 2s ease-in-out infinite;
+}
+@keyframes barPulse{50%{filter:brightness(2);}}
+
+/* ================= LEGENDARY ================= */
+.award.legendary{
+  border-left-color:var(--red);
+  box-shadow:
+    0 0 55px var(--glow-red),
+    0 0 120px rgba(255,60,60,.8);
+  animation:
+    glitchIn .4s steps(2,end),
+    pulseRed 1.4s ease-in-out infinite,
+    shake 2s infinite;
+}
+
+@keyframes pulseRed{
+  50%{
+    box-shadow:
+      0 0 80px var(--glow-red),
+      0 0 160px rgba(255,60,60,1);
+  }
+}
+
+@keyframes shake{
+  92%{transform:translateX(0);}
+  94%{transform:translateX(-2px);}
+  96%{transform:translateX(2px);}
+  98%{transform:translateX(-1px);}
+}
+
+/* ================= TITLE ================= */
+.award-title{
+  font-size:18px;
+  letter-spacing:1px;
+  color:#eaf7ff;
+  text-shadow:
+    0 0 10px var(--blue),
+    0 0 18px var(--purple);
+}
+
+/* ================= STACK ================= */
+.award[data-age="1"]{opacity:.85}
+.award[data-age="2"]{opacity:.6}
+.award[data-age="3"]{opacity:.4}
+</style>
+</head>
+
+<body>
+
+<div class="grid"></div>
+<div class="particles" id="particles"></div>
+
+<script>
+const DV='momentone';
+const API_KEY='4fd273d2afa20fbc3446a4c067f9eda5';
+</script>
+
+<div class="awards" id="awards"></div>
+
+<audio id="legendSound">
+<source src="https://assets.mixkit.co/sfx/preview/mixkit-futuristic-interface-2056.mp3">
+</audio>
+
+<script>
+/* ================= PARTICLES ================= */
+const pWrap=document.getElementById('particles');
+for(let i=0;i<40;i++){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.style.left=Math.random()*100+'vw';
+  p.style.animationDelay=Math.random()*15+'s';
+  pWrap.appendChild(p);
+}
+
+/* ================= LOGIC ================= */
+const container=document.getElementById('awards');
+const legendSound=document.getElementById('legendSound');
+let awardsState=[];
+
+function isLegendary(n=''){
+  n=n.toLowerCase();
+  return n.includes('garuda')||n.includes('wing of power')||n.includes('balgass');
+}
+
+function spawnRedParticles(){
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');
+    p.className='particle red-particle';
+    p.style.left=40+Math.random()*20+'vw';
+    p.style.animationDuration='6s';
+    pWrap.appendChild(p);
+    setTimeout(()=>p.remove(),6000);
+  }
+}
+
+function render(){
+  container.innerHTML='';
+  awardsState.forEach((a,i)=>{
+    const el=document.createElement('div');
+    el.className='award'+(a.legendary?' legendary':'');
+    el.dataset.age=i;
+
+    const t=document.createElement('div');
+    t.className='award-title';
+    t.textContent=a.name;
+
+    el.appendChild(t);
+    container.appendChild(el);
+  });
+}
+
+/* ================= FETCH (SYNC + UPDATE) ================= */
+function fetchAwards(){
+  const base=`https://megamu.net/dvapi.php?dv=${DV}&key=${API_KEY}&action=getawards`;
+
+  const proxies=[
+    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
+    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`
+  ];
+
+  let i=0;
+
+  function tryProxy(){
+    if(i>=proxies.length)return;
+
+    fetch(proxies[i](base))
+      .then(r=>r.json())
+      .then(res=>{
+        if(res.contents)res=JSON.parse(res.contents);
+        if(!Array.isArray(res.awards))throw 0;
+
+        const beforeIds = awardsState.map(a=>a.id);
+        const apiIds = res.awards.map(a=>a.id);
+
+        // remove os que sumiram
+        awardsState = awardsState.filter(a=>apiIds.includes(a.id));
+
+        let changed=false;
+
+        // adiciona novos
+        res.awards.forEach(a=>{
+          if(!awardsState.find(x=>x.id===a.id)){
+            const legendary=isLegendary(a.name);
+            awardsState.unshift({id:a.id,name:a.name,legendary});
+            if(legendary){
+              legendSound.play().catch(()=>{});
+              spawnRedParticles();
+            }
+            changed=true;
+          }
+        });
+
+        // detecta remoção
+        if(beforeIds.join()!==awardsState.map(a=>a.id).join()){
+          changed=true;
+        }
+
+        awardsState=awardsState.slice(0,4);
+
+        if(changed){
+          render();
+        }
+      })
+      .catch(()=>{
+        i++;
+        tryProxy();
+      });
+  }
+
+  tryProxy();
+}
+
+/* ================= INIT ================= */
+render();
+fetchAwards();
+setInterval(fetchAwards,15000);
+</script>
+
+</body>
+</html>

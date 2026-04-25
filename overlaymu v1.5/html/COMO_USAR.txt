@@ -1,0 +1,331 @@
+═══════════════════════════════════════════════════════════════════════
+  🎮 GUIA DE USO - OVERLAY DE AWARDS PARA OBS STUDIO
+═══════════════════════════════════════════════════════════════════════
+
+✨ SOLUÇÃO 100% HTML - SEM INSTALAR NADA! ✨
+
+═══════════════════════════════════════════════════════════════════════
+
+📋 ARQUIVOS:
+  • overlay.html      → Overlay
+  • COMO_USAR.txt     → Este guia
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 USO NO OBS STUDIO (RECOMENDADO)
+═══════════════════════════════════════════════════════════════════════
+
+1. Abra o OBS Studio
+
+2. Adicione uma nova fonte:
+   • Clique no "+" em Fontes
+   • Selecione "Navegador"
+   • Dê um nome (ex: "Awards Overlay")
+
+3. Configure a fonte:
+   
+   OPÇÃO A - Arquivo Local (Recomendado):
+   ────────────────────────────────────────
+   • Marque: ☑ "Local file" (Arquivo Local)
+   • Clique em "Procurar"
+   • Selecione: overlay.html
+   • Largura: 400
+   • Altura: 600
+   
+
+
+4. Configurações extras (recomendadas):
+   • ☑ Desativar o encerramento da fonte quando não visível
+   • ☑ Atualizar navegador quando a cena ficar ativa
+
+5. Clique em OK
+
+6. Posicione o overlay na tela:
+   • Arraste para o canto inferior esquerdo
+   • Redimensione se necessário
+
+7. PRONTO! Os awards aparecem automaticamente! 🎉
+
+═══════════════════════════════════════════════════════════════════════
+
+🌐 TESTE NO NAVEGADOR
+═══════════════════════════════════════════════════════════════════════
+
+Para testar antes de adicionar no OBS:
+
+1. Abra o arquivo overlay.html no seu navegador
+   (duplo clique ou arraste para o navegador)
+
+2. Aguarde alguns segundos
+
+3. Os awards devem aparecer automaticamente!
+   (Se não aparecer nada, pode ser que você não tenha awards - normal!)
+
+4. Se aparecer mensagem de erro:
+   • Verifique sua internet
+   • Verifique se DV e KEY estão corretos (linhas 156-157)
+
+═══════════════════════════════════════════════════════════════════════
+
+🎨 PERSONALIZAÇÃO DE CORES
+═══════════════════════════════════════════════════════════════════════
+
+Para mudar as cores, abra overlay.html e edite as linhas 11-28:
+
+  --card-font-color: #ffffff;           → Cor do texto (branco)
+  --card-border-color: rgba(...);        → Cor da borda
+  --card-tag-color: #ffd100;            → Cor da barra lateral (amarelo)
+  --card-bg: rgba(0, 0, 0, 0.45);       → Fundo do card (preto transparente)
+  --border-radius: 12px;                → Arredondamento das bordas
+
+EXEMPLOS DE CORES:
+  • Vermelho: #ff0000
+  • Verde: #00ff00
+  • Azul: #0066ff
+  • Roxo: #9b59b6
+  • Laranja: #ff6600
+  • Rosa: #ff1493
+
+═══════════════════════════════════════════════════════════════════════
+
+📍 MUDAR POSIÇÃO DOS CARDS
+═══════════════════════════════════════════════════════════════════════
+
+Edite as linhas 44-45 do overlay.html:
+
+  CANTO INFERIOR ESQUERDO (atual):
+    left: 24px;
+    bottom: 24px;
+
+  CANTO INFERIOR DIREITO:
+    right: 24px;
+    bottom: 24px;
+
+  CANTO SUPERIOR ESQUERDO:
+    left: 24px;
+    top: 24px;
+
+  CANTO SUPERIOR DIREITO:
+    right: 24px;
+    top: 24px;
+
+  CENTRALIZADO EMBAIXO:
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+
+═══════════════════════════════════════════════════════════════════════
+
+⚙️ CONFIGURAR SUAS CREDENCIAIS
+═══════════════════════════════════════════════════════════════════════
+
+Se você tem seu próprio DV e API Key do MegaMu:
+
+1. Abra overlay.html com Bloco de Notas (ou editor de texto)
+
+2. Localize as linhas 156-157:
+   
+   const DV = 'LOGIN_AQUI';
+   const API_KEY = 'KEY_AQUI';
+
+3. Substitua pelos seus dados
+
+4. Salve o arquivo (Ctrl+S)
+
+5. Pronto! Agora mostra seus awards
+
+═══════════════════════════════════════════════════════════════════════
+
+✨ FUNCIONALIDADES ESPECIAIS
+═══════════════════════════════════════════════════════════════════════
+
+🎭 ANIMAÇÃO DE BALANÇO
+  • Os cards balançam suavemente
+  • Cards ímpares: balançam para direita
+  • Cards pares: balançam para esquerda
+  • Efeito visual profissional e discreto
+
+ 🔄 ATUALIZAÇÃO SILENCIOSA E INTELIGENTE
+   • Primeira carga: mostra "Carregando..." brevemente
+   • Atualizações seguintes: cards permanecem visíveis
+   • Não há "piscar" durante atualizações
+   • Se a API falhar temporariamente: mantém os últimos awards visíveis
+   • Se houver erro de conexão: overlay continua mostrando últimos dados
+   • Atualiza apenas quando houver mudanças reais nos awards
+   • Experiência visual suave, contínua e estável
+
+👻 INVISIBILIDADE INTELIGENTE
+  • Sem awards = overlay completamente invisível
+  • Com awards = cards aparecem automaticamente
+
+═══════════════════════════════════════════════════════════════════════
+
+🐛 SOLUÇÃO DE PROBLEMAS
+═══════════════════════════════════════════════════════════════════════
+
+❌ NADA APARECE NO NAVEGADOR/OBS
+   
+   Solução:
+   → Abra o Console (F12 no navegador)
+   → Veja a aba "Console" para mensagens de erro
+   → Verifique sua conexão com internet
+   → Aguarde até 15 segundos (primeira carga + primeira atualização)
+   → Se você NÃO TEM AWARDS, o overlay fica invisível (normal!)
+   → Verifique se DV e API_KEY estão corretos (linhas 156-157)
+
+❌ "ERRO AO CARREGAR AWARDS"
+   
+   Solução:
+   → Verifique conexão com internet
+   → Confirme que o site megamu.net está online
+   → Tente atualizar a página (F5)
+   → Verifique se DV e KEY estão corretos
+
+❌ OVERLAY NÃO APARECE NO OBS
+   
+   Solução:
+   → Certifique-se que marcou "Local file"
+   → Verifique se o caminho do arquivo está correto
+   → Tente clicar com botão direito na fonte > "Atualizar"
+   → Aumente a largura/altura da fonte no OBS
+
+❌ OVERLAY APARECE CORTADO NO OBS
+   
+   Solução:
+   → Aumente a altura da fonte (ex: 800 pixels)
+   → Ajuste o tamanho da fonte arrastando os cantos
+   → Verifique se tem muitos awards (ocupa mais espaço)
+
+═══════════════════════════════════════════════════════════════════════
+
+🔍 COMO VERIFICAR SE ESTÁ FUNCIONANDO
+═══════════════════════════════════════════════════════════════════════
+
+1. Abra overlay.html no navegador
+
+2. Pressione F12 (abre ferramentas de desenvolvedor)
+
+3. Vá na aba "Console"
+
+4. Deve aparecer:
+   🎮 Overlay de Awards iniciado
+   📡 Funcionamento: Tenta direto → se der CORS usa proxy automaticamente
+   ✨ 100% HTML - Funciona em qualquer lugar!
+   ⏱️ Atualização automática: 15 segundos
+
+5. Se aparecer:
+   ✅ Requisição direta funcionou!
+   → Ótimo! Funcionando perfeitamente
+   
+   ✅ Usando proxy CORS (funcionando normalmente)
+   → Normal! O proxy está resolvendo o CORS
+
+═══════════════════════════════════════════════════════════════════════
+
+📊 FORMATO DOS DADOS
+═══════════════════════════════════════════════════════════════════════
+
+A API retorna os awards neste formato:
+
+{
+  "result": 1,
+  "awards": [
+    {
+      "name": "Wings of Angel (14d)",
+      "id": "612800",
+      "date": "2025-10-25 21:14:27"
+    },
+    {
+      "name": "Steel of Heaven",
+      "id": "612776",
+      "date": "2025-10-25 20:14:38"
+    }
+  ]
+}
+
+O overlay mostra o campo "name" de cada award.
+
+═══════════════════════════════════════════════════════════════════════
+
+💡 DICAS PROFISSIONAIS
+═══════════════════════════════════════════════════════════════════════
+
+1. Crie uma cena separada para o overlay no OBS
+   → Mais fácil de gerenciar
+
+2. Use transições suaves ao mostrar/ocultar
+   → Fica mais profissional na live
+
+3. Ajuste a opacidade se o overlay estiver muito forte
+   → Clique com botão direito > Filtros > Correção de Cor
+
+4. Duplique a fonte se quiser mostrar em dois lugares
+   → Clique com botão direito > Duplicar
+
+5. Crie um backup do arquivo overlay.html
+   → Antes de fazer modificações
+
+
+═══════════════════════════════════════════════════════════════════════
+
+❓ PERGUNTAS FREQUENTES
+═══════════════════════════════════════════════════════════════════════
+
+P: Preciso instalar algo?
+R: NÃO! É só abrir o arquivo HTML. Funciona em qualquer navegador.
+
+P: Funciona offline?
+R: NÃO. Precisa de internet para buscar dados da API do MegaMu.
+
+P: Posso usar em vários computadores?
+R: SIM! É só copiar o arquivo overlay.html.
+
+P: Posso modificar o visual?
+R: SIM! É HTML/CSS comum. Edite à vontade.
+
+P: Funciona em Mac/Linux?
+R: SIM! HTML funciona em qualquer sistema operacional.
+
+P: Os dados atualizam automaticamente?
+R: SIM! Atualiza a cada 15 segundos automaticamente.
+
+P: Posso mudar o tempo de atualização?
+R: SIM! Edite a linha 277: mude 15000 para outro valor (em milissegundos)
+   Exemplo: 10000 = 10 segundos, 30000 = 30 segundos
+
+P: Posso desativar a animação de balanço?
+R: SIM! Remova as linhas 65, 69-96 do overlay.html.
+   Ou altere o valor "4px" para "0px" nas linhas 84 e 94 para desativar.
+
+P: Posso ajustar a intensidade da animação?
+R: SIM! Nas linhas 84 e 94, mude "4px" para um valor maior (mais balanço)
+   ou menor (menos balanço). Exemplo: 8px = balanço mais intenso.
+
+P: Posso ajustar a velocidade da animação?
+R: SIM! Nas linhas 70 e 75, mude "3s" para outro valor.
+   Exemplo: 2s = mais rápido, 5s = mais lento.
+
+P: Consome muitos recursos do PC?
+R: NÃO! É super leve, apenas uma página HTML simples.
+
+═══════════════════════════════════════════════════════════════════════
+
+🎉 VANTAGENS DESTA SOLUÇÃO
+═══════════════════════════════════════════════════════════════════════
+
+✅ 100% HTML puro - sem instalar nada
+✅ Funciona em qualquer navegador
+✅ Resolve CORS automaticamente
+✅ Funciona no OBS sem configurações especiais
+✅ Visual moderno (glassmorphism)
+✅ Animação suave de balanço nos cards
+✅ Atualização silenciosa (sem piscar)
+✅ Invisível quando não há awards
+✅ Cores customizáveis
+✅ Leve e rápido
+✅ Atualização automática a cada 15s
+✅ Código limpo e comentado
+✅ Fácil de modificar
+
+═══════════════════════════════════════════════════════════════════════
+
