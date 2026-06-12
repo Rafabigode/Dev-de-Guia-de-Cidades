@@ -1,236 +1,169 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
+  View, Text, StyleSheet, ActivityIndicator,
+  FlatList, TextInput, TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import PontoTuristicoCard from '../components/PontoTuristicoCard';
+import api from '../services/api';
 
-const pontosTuristicos = [
-  {
-    id: '1',
-    nome: 'Parque Barigui',
-    descricao:
-      'Um dos maiores e mais frequentados parques de Curitiba, com lago, trilhas e vida selvagem, incluindo capivaras.',
-    categoria: 'Parque',
-    emoji: '🌳',
-    avaliacao: 4.8,
-  },
-  {
-    id: '2',
-    nome: 'Jardim Botânico',
-    descricao:
-      'Famoso pela sua estufa de ferro e vidro inspirada no Crystal Palace de Londres, com jardins formais belíssimos.',
-    categoria: 'Jardim',
-    emoji: '🌸',
-    avaliacao: 4.9,
-  },
-  {
-    id: '3',
-    nome: 'Ópera de Arame',
-    descricao:
-      'Teatro único construído com estrutura tubular de aço e paredes de vidro, localizado dentro de uma antiga pedreira.',
-    categoria: 'Cultura',
-    emoji: '🎭',
-    avaliacao: 4.7,
-  },
-  {
-    id: '4',
-    nome: 'Museu Oscar Niemeyer',
-    descricao:
-      'Conhecido como o "Museu do Olho" pela sua escultura em formato de olho, é um dos maiores museus de arte do Brasil.',
-    categoria: 'Museu',
-    emoji: '🏛️',
-    avaliacao: 4.6,
-  },
-  {
-    id: '5',
-    nome: 'Largo da Ordem',
-    descricao:
-      'Centro histórico de Curitiba, com feiras de artesanato aos domingos, bares, restaurantes e arquitetura colonial.',
-    categoria: 'Histórico',
-    emoji: '🏙️',
-    avaliacao: 4.5,
-  },
-  {
-    id: '6',
-    nome: 'Parque Tanguá',
-    descricao:
-      'Parque em antiga pedreira com lagos, cascata artificial, túnel e mirante com vista panorâmica da cidade.',
-    categoria: 'Parque',
-    emoji: '⛲',
-    avaliacao: 4.7,
-  },
-];
-
-const categoriasCores = {
-  Parque: '#27ae60',
-  Jardim: '#8e44ad',
-  Cultura: '#e67e22',
-  Museu: '#2980b9',
-  Histórico: '#c0392b',
-};
+const CATEGORIAS = ['Todos', 'Parque', 'Museu', 'Teatro'];
 
 const ListaPontosTuristicos = () => {
   const navigation = useNavigation();
-  const [favoritos, setFavoritos] = useState([]);
+  const [pontosTuristicos, setPontosTuristicos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
 
-  const toggleFavorito = (id) => {
-    setFavoritos((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
-  };
+  // Debounce
+  useEffect(() => {
+    const timerId = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
+    return () => clearTimeout(timerId);
+  }, [searchTerm]);
 
-  const irParaDetalhes = (ponto) => {
-    navigation.navigate('DetalhesPonto', {
-      pontoId: ponto.id,
-      nomePonto: ponto.nome,
-      descricaoPonto: ponto.descricao,
-      categoriaPonto: ponto.categoria,
-      emojiPonto: ponto.emoji,
-      avaliacaoPonto: ponto.avaliacao,
-      isFavorito: favoritos.includes(ponto.id),
-    });
-  };
+  useEffect(() => {
+    const fetchPontos = async () => {
+      try {
+        const response = await api.get('/posts');
+        const dados = response.data.map(item => ({
+          id: String(item.id),
+          nome: item.title,
+          descricao: item.body,
+          imagem: `https://picsum.photos/id/${item.id % 100}/150/150`,
+          latitude: -25.4284 + (Math.random() - 0.5) * 0.1,
+          longitude: -49.2733 + (Math.random() - 0.5) * 0.1,
+          detalhesCompletos: item.body + ' ' + item.title,
+          categoria: item.id % 3 === 0 ? 'Parque' : item.id % 3 === 1 ? 'Museu' : 'Teatro',
+        }));
+        setPontosTuristicos(dados);
+      } catch (err) {
+        setError('Não foi possível carregar os pontos turísticos.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPontos();
+  }, []);
 
-  const renderItem = ({ item }) => {
-    const corCategoria = categoriasCores[item.categoria] || '#555';
-    const isFav = favoritos.includes(item.id);
+  const filteredPontos = useMemo(() => {
+    let lista = pontosTuristicos;
+    if (debouncedSearchTerm) {
+      const termo = debouncedSearchTerm.toLowerCase();
+      lista = lista.filter(p =>
+        p.nome.toLowerCase().includes(termo) ||
+        p.descricao.toLowerCase().includes(termo)
+      );
+    }
+    if (selectedCategory !== 'Todos') {
+      lista = lista.filter(p => p.categoria === selectedCategory);
+    }
+    return lista;
+  }, [pontosTuristicos, debouncedSearchTerm, selectedCategory]);
 
+  if (isLoading) {
     return (
-      <TouchableOpacity style={styles.card} onPress={() => irParaDetalhes(item)}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardEmoji}>{item.emoji}</Text>
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardNome}>{item.nome}</Text>
-            <View style={[styles.badgeCategoria, { backgroundColor: corCategoria }]}>
-              <Text style={styles.badgeTexto}>{item.categoria}</Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={() => toggleFavorito(item.id)}>
-            <Text style={styles.favIcon}>{isFav ? '❤️' : '🤍'}</Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.cardDescricao} numberOfLines={2}>
-          {item.descricao}
-        </Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.avaliacao}>⭐ {item.avaliacao}</Text>
-          <Text style={styles.verMais}>Ver detalhes →</Text>
-        </View>
-      </TouchableOpacity>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1a5276" />
+        <Text style={styles.loadingText}>Carregando pontos turísticos...</Text>
+      </View>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTexto}>
-          {favoritos.length > 0
-            ? `❤️ ${favoritos.length} favorito(s) selecionado(s)`
-            : '🗺️ Explore Curitiba'}
-        </Text>
-      </View>
-      <FlatList
-        data={pontosTuristicos}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="🔍 Buscar pontos turísticos..."
+        placeholderTextColor="#aaa"
+        value={searchTerm}
+        onChangeText={setSearchTerm}
       />
+
+      <View style={styles.categoryContainer}>
+        {CATEGORIAS.map(cat => (
+          <TouchableOpacity
+            key={cat}
+            style={[styles.categoryBtn, selectedCategory === cat && styles.categoryBtnActive]}
+            onPress={() => setSelectedCategory(cat)}
+          >
+            <Text style={[styles.categoryTxt, selectedCategory === cat && styles.categoryTxtActive]}>
+              {cat}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.contador}>{filteredPontos.length} resultado(s)</Text>
+
+      {filteredPontos.length === 0 ? (
+        <Text style={styles.noResults}>Nenhum resultado para "{debouncedSearchTerm}"</Text>
+      ) : (
+        <FlatList
+          data={filteredPontos}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <PontoTuristicoCard
+              ponto={item}
+              onPress={() => navigation.navigate('DetalhesPonto', { pontoDetalhes: item })}
+            />
+          )}
+          contentContainerStyle={styles.lista}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f8',
-  },
-  header: {
-    backgroundColor: '#1a5276',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  headerTexto: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  lista: {
-    padding: 16,
-    gap: 12,
-  },
-  card: {
+  container: { flex: 1, backgroundColor: '#f0f4f8' },
+  searchInput: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    margin: 12,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#333',
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
   },
-  cardHeader: {
+  categoryContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    paddingHorizontal: 12,
+    gap: 8,
     marginBottom: 8,
-    gap: 10,
   },
-  cardEmoji: {
-    fontSize: 36,
+  categoryBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: '#e0e0e0',
   },
-  cardInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  cardNome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1a2b3c',
-  },
-  badgeCategoria: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  badgeTexto: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  favIcon: {
-    fontSize: 22,
-  },
-  cardDescricao: {
-    fontSize: 13,
-    color: '#666',
-    lineHeight: 18,
-    marginBottom: 10,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 8,
-  },
-  avaliacao: {
-    fontSize: 13,
-    color: '#e67e22',
-    fontWeight: '600',
-  },
-  verMais: {
-    fontSize: 13,
-    color: '#1a5276',
-    fontWeight: '600',
-  },
+  categoryBtnActive: { backgroundColor: '#1a5276' },
+  categoryTxt: { fontSize: 13, color: '#333', fontWeight: '600' },
+  categoryTxtActive: { color: '#fff' },
+  contador: { fontSize: 12, color: '#888', paddingHorizontal: 16, marginBottom: 4 },
+  lista: { paddingVertical: 6, paddingBottom: 20 },
+  noResults: { textAlign: 'center', marginTop: 40, fontSize: 15, color: '#888' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f4f8' },
+  loadingText: { marginTop: 10, fontSize: 15, color: '#666' },
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  errorText: { fontSize: 15, color: 'red', textAlign: 'center' },
 });
 
 export default ListaPontosTuristicos;
